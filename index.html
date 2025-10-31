@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,12 +7,26 @@
     <title>A-Frame 3D Model Showcase</title>
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <script>
+        AFRAME.registerComponent('clickable-link', {
+          schema: {
+            href: {default: ''}
+          },
+          init: function () {
+            this.el.addEventListener('click', (evt) => {
+              if (this.data.href) {
+                window.location.href = this.data.href;
+              }
+            });
+          }
+        });
+
         document.addEventListener('DOMContentLoaded', () => {
             const models = [
-                "10_29_2025.glb",
-                "Isaac New.glb",
-                "Kai_solomon_scaniverse.glb",
-                "Scaniverse 2025-10-28 152539.glb"
+                "glb/Shuo_Xi.glb",
+                "glb/Leslie_Omana.glb",
+                "glb/Kai_Solomon.glb",
+                "glb/Isaac_Mendoza_Pineda.glb",
+                "glb/Ella_Giannetta.glb"
             ];
 
             const scene = document.querySelector('a-scene');
@@ -35,8 +50,14 @@
                 const x = startX + col * xSpacing;
                 const z = startZ + row * zSpacing;
 
+                const modelName = modelFile.replace('glb/', '').replace('.glb', '');
+                const arPageUrl = `ar_${modelName}.html`;
+
                 const container = document.createElement('a-entity');
                 container.setAttribute('position', { x, y: 1.5, z });
+                container.setAttribute('clickable-link', `href: ${arPageUrl}`);
+                container.setAttribute('geometry', 'primitive: box; width: 4; height: 4; depth: 4');
+                container.setAttribute('material', 'visible: false');
 
                 const modelEntity = document.createElement('a-entity');
                 modelEntity.setAttribute('gltf-model', `#model${index}`);
@@ -51,7 +72,7 @@
 
                 const textEntity = document.createElement('a-text');
                 textEntity.setAttribute('text', {
-                    value: modelFile.replace('.glb', ''),
+                    value: modelName.replace(/_/g, ' '),
                     align: 'center',
                     color: '#000'
                 });
@@ -67,6 +88,24 @@
 <body>
     <a-scene background="color: #ECECEC">
         <a-assets></a-assets>
+
+        <a-camera>
+            <a-cursor></a-cursor>
+            <a-text
+                value="Click on a 3D scan model to go to its page."
+                position="0 1.4 -2"
+                color="#000"
+                width="4"
+                align="center">
+            </a-text>
+            <a-text
+                value="Use WASD buttons to navigate the gallery"
+                position="0 -1.4 -2"
+                color="#000"
+                width="4"
+                align="center">
+            </a-text>
+        </a-camera>
 
         <a-sky color="#ADD8E6"></a-sky>
 
