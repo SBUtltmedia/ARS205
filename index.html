@@ -1,117 +1,174 @@
-
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>A-Frame 3D Model Showcase</title>
-    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-    <script>
-        AFRAME.registerComponent('clickable-link', {
-          schema: {
-            href: {default: ''}
-          },
-          init: function () {
-            this.el.addEventListener('click', (evt) => {
-              if (this.data.href) {
-                window.location.href = this.data.href;
-              }
-            });
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A-Frame 3D Model Showcase</title>
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/aframe-cubemap-component@4.0.0/index.js"></script>
+  <script>
+    AFRAME.registerComponent('clickable-link', {
+      schema: {
+        href: { default: '' }
+      },
+      init: function () {
+        this.el.addEventListener('click', (evt) => {
+          if (this.data.href) {
+            window.location.href = this.data.href;
           }
         });
+      }
+    });
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const models = [
-                "glb/Shuo_Xi.glb",
-                "glb/Leslie_Omana.glb",
-                "glb/Kai_Solomon.glb",
-                "glb/Isaac_Mendoza_Pineda.glb",
-                "glb/Ella_Giannetta.glb"
-            ];
+    AFRAME.registerComponent('html-label', {
+      schema: {
+        text: {type: 'string', default: ''}
+      },
+      init: function () {
+        this.label = document.createElement('div');
+        this.label.className = 'absolute bg-white text-gray-800 text-lg font-semibold p-2 rounded-lg shadow-xl pointer-events-none text-center';
+        this.label.textContent = this.data.text;
+        document.body.appendChild(this.label);
 
-            const scene = document.querySelector('a-scene');
-            const assets = document.querySelector('a-assets');
-            const modelsPerRow = 2;
-            const xSpacing = 6;
-            const zSpacing = -4;
-            const startX = -3;
-            const startZ = -3;
+        this.worldPos = new THREE.Vector3();
+      },
+      tick: function () {
+        const camera = this.el.sceneEl.camera;
+        if (!camera) return;
 
-            models.forEach((modelFile, index) => {
-                // Create asset item
-                const asset = document.createElement('a-asset-item');
-                asset.setAttribute('id', `model${index}`);
-                asset.setAttribute('src', modelFile);
-                assets.appendChild(asset);
+        this.el.object3D.getWorldPosition(this.worldPos);
+        const screenPos = this.worldPos.clone().project(camera);
 
-                // Create model entity
-                const row = Math.floor(index / modelsPerRow);
-                const col = index % modelsPerRow;
-                const x = startX + col * xSpacing;
-                const z = startZ + row * zSpacing;
+        if (screenPos.z > 1) {
+            this.label.style.display = 'none';
+            return;
+        }
+        this.label.style.display = 'block';
 
-                const modelName = modelFile.replace('glb/', '').replace('.glb', '');
-                const arPageUrl = `ar_${modelName}.html`;
+        const width = window.innerWidth, height = window.innerHeight;
+        const widthHalf = width / 2, heightHalf = height / 2;
 
-                const container = document.createElement('a-entity');
-                container.setAttribute('position', { x, y: 1.5, z });
-                container.setAttribute('clickable-link', `href: ${arPageUrl}`);
-                container.setAttribute('geometry', 'primitive: box; width: 4; height: 4; depth: 4');
-                container.setAttribute('material', 'visible: false');
+        const x = (screenPos.x * widthHalf) + widthHalf;
+        const y = - (screenPos.y * heightHalf) + heightHalf;
 
-                const modelEntity = document.createElement('a-entity');
-                modelEntity.setAttribute('gltf-model', `#model${index}`);
-                modelEntity.setAttribute('scale', '0.5 0.5 0.5');
-                modelEntity.setAttribute('animation', {
-                    property: 'rotation',
-                    to: '0 360 0',
-                    dur: 10000,
-                    easing: 'linear',
-                    loop: true
-                });
+        this.label.style.left = `${x}px`;
+        this.label.style.top = `${y}px`;
+        this.label.style.transform = 'translateX(-50%) translateY(-120%)';
+      },
+      remove: function () {
+        if (this.label) {
+          this.label.parentNode.removeChild(this.label);
+        }
+      }
+    });
 
-                const textEntity = document.createElement('a-text');
-                textEntity.setAttribute('text', {
-                    value: modelName.replace(/_/g, ' '),
-                    align: 'center',
-                    color: '#000'
-                });
-                textEntity.setAttribute('position', '0 -1 0');
+    document.addEventListener('DOMContentLoaded', () => {
+      const models = [
+        "glb/Shuo_Xi.glb",
+        "glb/Leslie_Omana.glb",
+        "glb/Kai_Solomon.glb",
+        "glb/Isaac_Mendoza_Pineda.glb",
+        "glb/Ella_Giannetta.glb"
+      ];
 
-                container.appendChild(modelEntity);
-                container.appendChild(textEntity);
-                scene.appendChild(container);
-            });
+      const scene = document.querySelector('a-scene');
+      const assets = document.querySelector('a-assets');
+      const radius = 6;
+
+      models.forEach((modelFile, index) => {
+        // Create asset item
+        const asset = document.createElement('a-asset-item');
+        asset.setAttribute('id', `model${index}`);
+        asset.setAttribute('src', modelFile);
+        assets.appendChild(asset);
+
+        // Create model entity in a circle
+        const angle = index * (2 * Math.PI / models.length);
+        const x = radius * Math.cos(angle);
+        const z = radius * Math.sin(angle);
+
+        const modelName = modelFile.replace('glb/', '').replace('.glb', '');
+        const arPageUrl = `ar_${modelName}.html`;
+
+        const container = document.createElement('a-entity');
+        container.setAttribute('position', { x, y: 0.5, z });
+        container.setAttribute('clickable-link', `href: ${arPageUrl}`);
+        container.setAttribute('geometry', 'primitive: box; width: 4; height: 4; depth: 4');
+        container.setAttribute('material', 'visible: false');
+        container.setAttribute('look-at', '0 1.5 0');
+
+        const modelEntity = document.createElement('a-entity');
+        modelEntity.setAttribute('gltf-model', `#model${index}`);
+        modelEntity.setAttribute('scale', '0.5 0.5 0.5');
+        modelEntity.setAttribute('animation', {
+          property: 'rotation',
+          to: '0 360 0',
+          dur: 10000,
+          easing: 'linear',
+          loop: true
         });
-    </script>
+
+        const labelEntity = document.createElement('a-entity');
+        labelEntity.setAttribute('position', '0 -0.9 0');
+        labelEntity.setAttribute('html-label', `text: ${modelName.replace(/_/g, ' ')}`);
+
+        container.appendChild(modelEntity);
+        container.appendChild(labelEntity);
+        scene.appendChild(container);
+      });
+    });
+  </script>
 </head>
+
 <body>
-    <a-scene background="color: #ECECEC">
-        <a-assets></a-assets>
+  <a-scene background="color: #ECECEC">
+    <a-assets>
+    </a-assets>
 
-        <a-camera>
-            <a-cursor></a-cursor>
-            <a-text
-                value="Click on a 3D scan model to go to its page."
-                position="0 1.4 -2"
-                color="#000"
-                width="4"
-                align="center">
-            </a-text>
-            <a-text
-                value="Use WASD buttons to navigate the gallery"
-                position="0 -1.4 -2"
-                color="#000"
-                width="4"
-                align="center">
-            </a-text>
-        </a-camera>
+    <a-camera>
+      <a-cursor></a-cursor>
+      <!-- <a-text value="Click on a 3D scan model to go to its page." position="0 1.4 -2" color="#000" width="4"
+        align="center">
+      </a-text>
+      <a-text value="Use WASD buttons to navigate the gallery" position="0 -1.4 -2" color="#000" width="4"
+        align="center">
+      </a-text> -->
+    </a-camera>
 
-        <a-sky color="#ADD8E6"></a-sky>
-
+    <a-light type="ambient" color="#888"></a-light>
+    <a-light type="directional" intensity="0.5" position="-1 1 2"></a-light>
+    <a-entity cubemap="folder: https://threejs.org/examples/textures/cube/Park2/; ext: jpg"></a-entity>
+    <a-sky src="assets/texture.png"></a-sky>
         <a-light type="ambient" color="#888"></a-light>
-        <a-light type="directional" intensity="0.5" position="-1 1 2"></a-light>
+    <a-light type="directional" intensity="0.5" position="-1 1 2"></a-light>
+  </a-scene>
 
-    </a-scene>
+   <div id="container">
+
+        <!-- The 3D canvas -->
+        <canvas id="bg"></canvas>
+
+        <!-- Top Text Overlay -->
+        <!-- Positioned 4% from the top, centered horizontally -->
+        <div class="absolute top-[6%] left-1/2 -translate-x-1/2 z-10 
+                    bg-white text-gray-800 text-2xl 
+                    font-semibold p-3 rounded-lg shadow-xl 
+                    pointer-events-none text-center">
+            Click on a 3D scan model to go to its page
+        </div>
+
+        <!-- Bottom Text Overlay -->
+        <!-- Positioned 4% from the bottom, centered horizontally -->
+        <div class="absolute bottom-[6%] left-1/2 -translate-x-1/2 z-10 
+                    bg-white text-gray-800 text-2xl
+                    font-semibold p-3 rounded-lg shadow-xl 
+                    pointer-events-none text-center">
+            Use WASD buttons to navigate the gallery
+        </div>
+
+    </div>
 </body>
+
 </html>
