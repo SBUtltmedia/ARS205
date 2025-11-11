@@ -83,6 +83,15 @@
             border-bottom-left-radius: 12px;
             border-bottom-right-radius: 12px;
         }
+
+        /* This is the correct way to move the AR button.
+          We target the "part" named "default-ar-button" inside the model-viewer component.
+        */
+        model-viewer::part(default-ar-button) {
+            top: 16px;  /* Position from the top */
+            right: 16px; /* Position from the right */
+            bottom: auto; /* Unset the default bottom positioning */
+        }
     </style>
 </head>
 <body>
@@ -108,12 +117,11 @@
           - ios-src: Your USDZ model.
           - ar-placement="top-right": This is the new attribute to move the AR button.
         -->
-        <!-- ar-placement="top-right" moves the AR button -->
+        <!-- Removed the incorrect ar-placement attribute -->
         <model-viewer 
             src="https://modelviewer.dev/shared-assets/models/Astronaut.glb"
             ios-src="https://cdn.jsdelivr.net/gh/liamyehudai/spz@main/Sculpture.usdz"
             ar
-            ar-placement="top-right"
             camera-controls
             auto-rotate
             alt="A 3D model of a sculpture">
