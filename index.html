@@ -99,7 +99,7 @@
         const container = document.createElement('a-entity');
         container.setAttribute('position', { x, y: 0.5, z });
         container.setAttribute('clickable-link', `href: ${arPageUrl}`);
-        container.setAttribute('geometry', 'primitive: box; width: 1; height: 1; depth: 1');
+        container.setAttribute('geometry', 'primitive: box; width: 0.01; height: 0.01; depth: 0.01');
         container.setAttribute('material', 'visible: false');
         container.setAttribute('look-at', '0 1.5 0');
 
