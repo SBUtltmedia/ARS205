@@ -22,6 +22,34 @@
             color: #333;
         }
         
+        /* Style for the new back button */
+        .back-button {
+            position: fixed; /* Stays in place even when scrolling */
+            top: 1.5rem;
+            left: 1.5rem;
+            z-index: 100; /* Ensures it's on top of other content */
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 1rem 0.5rem 0.75rem;
+            background-color: rgba(255, 255, 255, 0.9);
+            color: #333;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            border-radius: 9999px; /* pill shape */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s ease-in-out;
+            -webkit-backdrop-filter: blur(5px); /* iOS blur */
+            backdrop-filter: blur(5px); /* Standard blur */
+        }
+        .back-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        }
+        .back-button svg {
+            margin-right: 0.25rem;
+        }
+
         .container {
             width: 90%;
             max-width: 800px;
@@ -55,13 +83,32 @@
             border-bottom-left-radius: 12px;
             border-bottom-right-radius: 12px;
         }
+
+        /* This is the correct way to move the AR button.
+          We target the "part" named "default-ar-button" inside the model-viewer component.
+        */
+        model-viewer::part(default-ar-button) {
+            top: 16px;  /* Position from the top */
+            right: 16px; /* Position from the right */
+            bottom: auto; /* Unset the default bottom positioning */
+        }
     </style>
 </head>
 <body>
 
+    <!-- New Back Button -->
+    <!-- It now links directly to index.html -->
+    <a href="index.html" class="back-button">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="20" height="20">
+            <path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clip-rule="evenodd" />
+        </svg>
+        <span>Back</span>
+    </a>
+
     <div class="container">
-        <h1>View Shuo_Xi in Your Space</h1>
-        <p>This is a 3D model of Shuo_Xi. Click the cube icon on the bottom right on your phone to view it in Augmented Reality.</p>
+        <h1>View Shuo Xi in Your Space</h1>
+        <!-- Updated paragraph to reflect the new button position -->
+        <p>This is a 3D model of Shuo Xi. Click the cube icon on the <strong>top right</strong> on your phone to view it in Augmented Reality.</p>
         
         <model-viewer 
             src="glb/Shuo_Xi.glb"
@@ -69,7 +116,7 @@
             ar
             camera-controls
             auto-rotate
-            alt="A 3D model of Shuo_Xi">
+            alt="A 3D model of Shuo Xi">
         </model-viewer>
     </div>
 
