@@ -90,6 +90,7 @@
                 }
                 const img = new Image();
                 img.src = url;
+                img.className = 'rounded-lg';
                 qrCodeContainer.appendChild(img);
             });
         });
@@ -155,6 +156,19 @@
         container.appendChild(labelEntity);
         scene.appendChild(container);
       });
+
+      document.addEventListener('keydown', function(e) {
+          if (e.code === 'Space') {
+              e.preventDefault();
+              if (!document.fullscreenElement) {
+                  document.documentElement.requestFullscreen();
+              } else {
+                  if (document.exitFullscreen) {
+                      document.exitFullscreen();
+                  }
+              }
+          }
+      });
     });
   </script>
 </head>
@@ -166,7 +180,7 @@
 
     <a-camera animation="property: rotation; to: 0 360 0; loop: true; dur: 360000; easing: linear">
       <a-cursor></a-cursor>
-      <!-- <a-text value="Click on a 3D scan model to go to its page." position="0 1.4 -2" color="#000" width="4"
+      <!-- <a-text value="Welcome to the Arts and Biomechanical Engineering Collaborative Virtual Gallery" position="0 1.4 -2" color="#000" width="4"
         align="center">
       </a-text>
       <a-text value="Use WASD buttons to navigate the gallery" position="0 -1.4 -2" color="#000" width="4"
@@ -193,7 +207,7 @@
                     bg-white text-gray-800 text-2xl 
                     font-semibold p-3 rounded-lg shadow-xl 
                     pointer-events-none text-center">
-            Click on a 3D scan model to go to its page
+            Welcome to the Arts and Biomechanical Engineering Collaborative Virtual Gallery
         </div>
 
         <!-- Bottom Text Overlay -->
