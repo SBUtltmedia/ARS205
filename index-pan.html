@@ -8,6 +8,7 @@
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/aframe-cubemap-component@4.0.0/index.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
   <script>
     AFRAME.registerComponent('clickable-link', {
       schema: {
@@ -64,6 +65,37 @@
       }
     });
 
+    AFRAME.registerComponent('qr-code-generator', {
+      schema: {
+        arPageUrl: {type: 'string', default: ''}
+      },
+      init: function () {
+        const qrCodeContainer = document.getElementById('qrcode-container');
+        if (!qrCodeContainer) {
+            console.error('QR code container not found');
+            return;
+        }
+
+        this.el.addEventListener('mouseenter', () => {
+            const fullUrl = `https://sbutltmedia.github.io/ARS205/${this.data.arPageUrl}`;
+            const qrCodeSize = window.innerHeight * 0.4; // 40% of height
+            
+            // Clear previous QR code
+            qrCodeContainer.innerHTML = '';
+
+            QRCode.toDataURL(fullUrl, { width: qrCodeSize, height: qrCodeSize }, function (err, url) {
+                if (err) {
+                    console.error(err);
+                    return;
+                }
+                const img = new Image();
+                img.src = url;
+                qrCodeContainer.appendChild(img);
+            });
+        });
+      }
+    });
+
     document.addEventListener('DOMContentLoaded', () => {
       const models = [
         "glb/Shuo_Xu.glb",
@@ -99,7 +131,8 @@
         const container = document.createElement('a-entity');
         container.setAttribute('position', { x, y: 0.5, z });
         container.setAttribute('clickable-link', `href: ${arPageUrl}`);
-        container.setAttribute('geometry', 'primitive: box; width: 0.01; height: 0.01; depth: 0.01');
+        container.setAttribute('qr-code-generator', `arPageUrl: ${arPageUrl}`);
+        container.setAttribute('geometry', 'primitive: box; width: 2; height: 2; depth: 2');
         container.setAttribute('material', 'visible: false');
         container.setAttribute('look-at', '0 1.5 0');
 
@@ -169,10 +202,13 @@
                     bg-white text-gray-800 text-2xl
                     font-semibold p-3 rounded-lg shadow-xl 
                     pointer-events-none text-center">
-            Use WASD buttons to navigate the gallery
+            Scan the QR code to view this model in AR ->
         </div>
 
     </div>
+
+    <div id="qrcode-container" class="absolute bottom-10 right-10 z-20"></div>
+
 </body>
 
 </html>
